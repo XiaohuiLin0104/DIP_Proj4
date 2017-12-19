@@ -1,0 +1,450 @@
+
+\documentclass[journal]{IEEEtran}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+%
+
+
+
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+% graphicx was written by David Carlisle and Sebastian Rahtz. It is
+% required if you want graphics, photos, etc. graphicx.sty is already
+% installed on most LaTeX systems. The latest version and documentation can
+% be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/required/graphics/
+% Another good source of documentation is "Using Imported Graphics in
+% LaTeX2e" by Keith Reckdahl which can be found as epslatex.ps or
+% epslatex.pdf at: http://www.ctan.org/tex-archive/info/
+%
+% latex, and pdflatex in dvi mode, support graphics in encapsulated
+% postscript (.eps) format. pdflatex in pdf mode supports graphics
+% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
+% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
+% not a bitmapped formats (.jpeg, .png). IEEE frowns on bitmapped formats
+% which can result in "jaggedy"/blurry rendering of lines and letters as
+% well as large increases in file sizes.
+%
+% You can find documentation about the pdfTeX application at:
+% http://www.tug.org/applications/pdftex
+
+
+
+
+
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Analysis of the Image Segmentation Algorithm and Morphological filtering methods}
+%
+%
+% author names and IEEE memberships
+
+
+\author{Xiaohui Lin, Institute of Image Communication and Information Processing% <-this % stops a space
+\thanks{Xiaohui Lin is with the Institute of Image Communication and Information Processing, Shanghai Jiao Tong University, 800 Dongchuan Road, Shanghai,
+200240 China (e-mail: linxiaohui0104@hotmail.com)}}
+%GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this % stops a space
+%\thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
+%\thanks{Manuscript received April 19, 2005; revised January 11, 2007.}}
+
+
+
+% The paper headers
+\markboth{Digital Image Processing,~Project~4, December~2017}%
+{Shell \MakeLowercase{\textit{et al.}}: Bare Demo of IEEEtran.cls for Journals}
+% The only time the second header will appear is for the odd numbered pages
+% after the title page when using the twoside option.
+%
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+\maketitle
+
+
+\begin{abstract}
+%\boldmath
+In computer vision, image segmentation is the process of  partitioning a digital image into multiple segments. The goal of segmentation is to simplify or change the representation of an image into something that is meaningful and easier to analyze. Image segmentation is typically used to locate objects and boundaries in images. There exist several image segmentation algorithms, generally based on one of two basic properties of intensity values -- discontinuity and similarity. Segmentation accuracy determines the eventual success or failure of computerized analysis procedures. Additionally, morphological image processing can be after image segmentation to get better results. This paper applied two edge detection methods, Canny and LoG, and region-growing methods on several gray images, followed by morphological filtering methods such as close operation and open operation. Then the comparison between the three methods is made according to the segmentation results. Finally, a general conclusion is given.
+
+\end{abstract}
+% IEEEtran.cls defaults to using nonbold math in the Abstract.
+% This preserves the distinction between vectors and scalars. However,
+% if the journal you are submitting to favors bold math in the abstract,
+% then you can use LaTeX's standard command \boldmath at the very start
+% of the abstract to achieve this. Many IEEE journals frown on math
+% in the abstract anyway.
+
+% Note that keywords are not normally used for peerreview papers.
+\begin{IEEEkeywords}
+image segmentation, edge detection, thresholding, region-growing, morphological filter.
+\end{IEEEkeywords}
+
+
+
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+% The very first letter is a 2 line initial drop letter followed
+% by the rest of the first word in caps.
+%
+% form to use if the first word consists of a single letter:
+% \IEEEPARstart{A}{demo} file is ....
+%
+% form to use if you need the single drop letter followed by
+% normal text (unknown if ever used by IEEE):
+% \IEEEPARstart{A}{}demo file is ....
+%
+% Some journals put the first two words in caps:
+% \IEEEPARstart{T}{his demo} file is ....
+%
+% Here we have the typical use of a "T" for an initial drop letter
+% and "HIS" in caps to complete the first word.
+\IEEEPARstart{I}{mage} segmentation subdivides an image into its constituent regions or objects. The goal is to simplify and change the representation of an image into something that is more meaningful and easier to analyze$ ^{[1][2]} $. It is the process of assigning a label to every pixel in an image such that pixels with the same label share certain characteristics.
+
+The thresholding method is based on a clip-level (or a threshold value) to turn a gray-scale image into a binary image. The key of the method is to select the threshold value (or values when multiple-level are selected). Several popular methods are used in industry including the maximum entropy method. Otsu's method (maximum variance), and k-means clustering$ ^{[3]} $.
+
+Region boundaries and edges are closely related, since there is often a sharp adjustment in intensity at the region boundaries. Edge detection techniques have therefore been used as the base of one of segmentation techniques. Edge detection is a well-developed field on its own within image processing. The edge identified by edge detection are often disconnected. To segment an object from an image however, one needs closed region boundaries. The desired edges are the boundaries between such objects or spatial-taxons$ ^{[4][5]} $.
+
+Region-growing methods rely mainly on the assumption that the neighbouring pixels within one region have similar values.
+
+To get better results, there develop many other methods. Compression based methods postlate the optimal segmentation is the one minimizes, over all possible segmentations, the coding length of the data$ ^{[6]} $. Histogram-based methods are very efficient compared to other image segmentation methods because they typically require only one pass through the pixels. In this technique, a histogram is computed from all of the pixels in the image, and the peaks and valleys in the histogram are used to locate the clusters in the image. Color and intensity can be used as the measure. Moreover, using a paritial differential equation (PDE)-based method and solving the PDE equation by a numerical scheme, one can segment the image$ ^{[7]} $.
+
+Mathematical morphology is a tool to extract image components that are useful in the representation and description of region shape. Morphological image processing can be used after image segmentation to get better segmentation results.
+
+The thesis first adopts edge detetction methods and region-growing algorithm on two gray images and then optimizes the results via closing operation.
+
+This paper is organized as follows: Section II introduces different image segmentation methods and different morphological filtering methods. Then we present the experiments and analyze the results in section III and finally draw the conclusion in section IV.
+
+
+
+% Note that IEEE does not put floats in the very first column - or typically
+% anywhere on the first page for that matter. Also, in-text middle ("here")
+% positioning is not used. Most IEEE journals use top floats exclusively.
+% Note that, LaTeX2e, unlike IEEE journals, places footnotes above bottom
+% floats. This can be corrected via the \fnbelowfloat command of the
+% stfloats package.
+\section{IMAGE SEGMENTATION METHODS}
+\subsubsection{Laplacian of a Gaussian method}
+In an image, second-order derivative are obtained using the Laplacian operator, expressed as Eq.\ref{e1}.
+\begin{equation}\label{e1}
+L_{1}=
+\begin{bmatrix}
+0 &-1  &0 \\ 
+-1 & 4 & -1\\ 
+0 & -1 & 0
+\end{bmatrix} 
+\end{equation}
+To improve the performance, we usually use the deformed one, expressed as Eq.\ref{e2}.
+\begin{equation}\label{e2}
+L_{2}=
+\begin{bmatrix}
+-1 &-1  &-1 \\ 
+-1 & 8 & -1\\ 
+-1 & -1 & -1
+\end{bmatrix} 
+\end{equation}
+
+Based on Laplacian operator, Marr and Hildreth came up with Laplacian of a Gaussian operator, which combines Laplacian operator with soomthing operator. First and foremost, it should be a differential operator capable of computing a digital approximation of the derivatives of the image. Second, it should be capable of being tuned to act at any desired scale. The filter $\nabla^{2}G $, where $ \nabla^{2} $ is the Laplacian operator and $ G $ is the 2-D Gaussian function, formulated as Eq.\ref{e3}.
+\begin{equation}\label{e3}
+	G(x,y)=exp(-\dfrac{x^{2}+y^{2}}{2\sigma^{2}})
+\end{equation}
+$ \nabla^{2}G $ is called the Laplacian of a Gaussian (LoG), whose expression is:
+\begin{equation}\label{e4}
+ \nabla^{2}G(x,y) =[\dfrac{x^{2}+y^{2}-2\sigma^{2}}{\sigma^{4}}]exp(-\dfrac{x^{2}+y^{2}}{2\sigma^{2}})
+\end{equation}
+
+\subsubsection{Canny edge detector}
+The Canny edge detector is an edge detection operator that uses a multi-stage algorithm to detect a wide range of edges in images. The goal of Canny edge detector is to find the optimal algorithm, which means the method can identify the real edge as many as possible. 
+\paragraph{Denoising}
+The first step is to filter out any noise in the original image before trying to locate and detect any edges. The Gaussian filter is used exclusively in the Canny algorithm for its simplicity. Once a suitable mask has been calculated, the Gaussian smoothing can be performed using standard convolution methods. The larger the width of the Gaussian mask is, the lower is the detector's sensitivity to noise. The localization error in the detected edges also increases slightly as the Gaussian width is increased. The Gaussian mask used is shown as Eq.\ref{e5}
+\begin{equation}\label{e5}
+\dfrac{1}{115}
+\begin{bmatrix}
+2 &4  &5&4&2 \\ 
+4 & 9 &12&9&4\\ 
+5 & 12 &15&12&5\\
+4 & 9 &12&9&4\\
+2 &4  &5&4&2
+\end{bmatrix} 
+\end{equation}
+
+\paragraph{Gradient}
+After smoothing the image and eliminating the noise, Canny algorithm finds the edge strength by taking the gradient of the image. The most popular operators are Sobel, Prewitt and so on.
+
+\paragraph{Non-maxima suppression (NMS)}
+Non-maxima suppression is used to trace along the edge in the edge direction and suppress any pixel value (sets it equal to 0) that is not considered to be an edge.
+
+Fig.\ref{f3} explains the theory of NMS. The blue line denotes the gradient direction of the center-point $C$, thus the local maximum can only distribute along the line. If the value of gary level in the point $C$ is smaller than either of the two points -- $dTmp1 $ and $dTmp2$, then we will eliminate the point $C$.
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.2in]{non.jpg}
+\caption{Theory of non-maxima suppression}
+\label{f1}
+\end{figure}
+
+\paragraph{Hysteresis}
+Hysteresis is used as a mean of eliminating steaking. Steaking is the breaking up of an edge contour caused by the operator by the operator output fluctuating above and below the threshold. If a single threshold $ T1 $ is applied to an image, and an edge has an average strength equal to $ T1$, then due to noise, there will be instances where the edges dips below the threshold. To avoid this, hysteresis uses two thresholds. Any pixel in the image that has a value greater than $ T1 $ is presumed to be an edge pixel while any pixels connected to this edge pixel and have a value greater than $ T2 $ are also selected as edge pixels.
+
+\subsection{Regoin-growing method}
+Region-growing method is to partition an image into regions that are similar according to a set of predefined criteria. More precisely, it is a procedure that groups pixels or subregions into larger regions based on predefined criteria.
+
+The basic approach is to start with a set of 'seed' points and form these grow regions by appending to each seed those neighboring pixels that have preperties similar to the seed, such as specific ranges of gray level or color.
+\begin{equation}\label{e6}
+\left | f(m,n)-\bar{\mu}\right|<2 
+\end{equation}
+
+According to Eq.\ref{e6}, the procedure can be described as Fig.\ref{f4} showns.
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.2in]{regrow.jpg}
+\caption{Procedure of region-growing method}
+\label{f2}
+\end{figure}
+
+\subsection{Morphological filter methods}
+Mathematical morphology is a tool to extract image components that are useful in the representation and description of region shape, such as boundaries, skeletons, and the convex hull. Morphological image processing can be used after image segmentation to get better segmentation results.
+
+\subsubsection{Dilation}
+The dilation of $ A $ by $ B $ is the set of all displayments $ z $, such that the reflection of $ B $, $ \hat{B} $ and $ A $ overlap by at least one element, expressed as Eq.\ref{e7}
+\begin{equation}\label{e7}
+A \oplus B = \left\{ z | (\hat{B})_{z} \cap  A \neq \O \right\}
+\end{equation}
+If B is symmetrical, the result of dilation is shown in Fig.\ref{f5:a} while the asymmetrical one is shown in Fig.\ref{f5:b}
+\begin{figure}[h]
+\centering
+\subfigure[]{
+\label{f5:a}
+\includegraphics[width = 2in]{sys.jpg}}
+\hspace{1in}
+\subfigure[]{
+\label{f5:b}
+\includegraphics[width = 3.2in]{asys.jpg}}
+\caption{Dilation of $A$ by $B$ -- (a) Symmetrical; (b) Asymmetrical}
+\label{f5}
+\end{figure}
+
+\subsubsection{Erosion}
+The erosion of $ A $ by $ B $ is the set of all points $ z $ such that $ B $, translated by $ z $, is contained by $ A $.
+\begin{equation}\label{e8}
+A \ominus B = \left\{ z | (B)_{z} \subseteq   A\right\}
+\end{equation}
+
+There also exist two kinds of situation, shown in Fig.\ref{f6}.
+
+\begin{figure}[h]
+\centering
+\subfigure[]{
+\includegraphics[width = 3.2in]{ss.jpg}}
+\hspace{1in}
+\subfigure[]{
+\includegraphics[width = 3.2in]{ass.jpg}}
+\caption{Erosion of $A$ by $B$ -- (a) Symmetrical; (b) Asymmetrical}
+\label{f6}
+\end{figure}
+
+\subsubsection{Opening and closing}
+Combine the dilation and eroson in different turns, we can get opening and closing operator, expressed as Eq.\ref{e9} and Eq.\ref{e10} respectively.
+\begin{equation}\label{e9}
+A_{B}=A \circ B=(A\ominus B)\oplus B
+\end{equation}
+\begin{equation}\label{e10}
+A^{B}=A\bullet  B=(A\oplus B)\ominus B
+\end{equation}
+
+Opening generally smooths the contour of an object, breaks narror isthmuses and eliminates thin protrusions while closing tends to smooth sections of contours, generally fuses narrow breaks and long thin gulfs, eliminates small holes and fills gaps in the contour. Continuous opening and closing process can remove small holes and objects.
+
+
+
+\section{Experiment and analysis}
+\subsection{Experiment results}
+Here we chose and conducted edge detection methods LoG operator on two gray images which involved cars. After that, morphological filtering was operating to improve the segmentation results. First we chose several images including cars and convert them into gray scale. Then the LoG operator is used to detect the edge of the whole image, after which the dilate opeation and the erode operation are conducted to eliminate small holes and fill gaps in the contour. The experiment was operated on MATLAB R2014a with Windows 7 Operating System.
+
+The pictures we processed is as below. 
+
+\begin{figure}[a]
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:a} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{raw_car3.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:b}
+    \includegraphics[width=0.2\textwidth]{log_car3.jpg}} 
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:c} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{raw_car2.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:d}
+    \includegraphics[width=0.2\textwidth]{log_car2.jpg}}  
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:e} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{raw_car1.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:f}
+    \includegraphics[width=0.2\textwidth]{log_car1.jpg}}
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:g} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{raw_car4.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:h}
+    \includegraphics[width=0.2\textwidth]{log_car4.jpg}}
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:j} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{raw_car5.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:k}
+    \includegraphics[width=0.2\textwidth]{log_car5.jpg}}  
+  \caption{Image segmentation results - (a)(c)(e)(g)(i) Original image; (b)(d)(f)(h)(j) Result after LoG operator method; }
+  \label{f5} %% label for entire figure
+\end{figure}
+
+\subsection{Analysis and discussion}
+From the results displayed in the Fig.\ref{f5},we can see the different results after the LoG operator and morphological methods, $(b)(d)(f)(h)(j)$are the edges detected from the original images. With the  LoG operator we can easily detect the edges among the images. However there are lots of small holes and small gaps in the contour. Thus we chose the close operation to eliminate the small holes and gaps. After that we filled the holes with zeros, and the results are shown in the Fig.\ref{f6}. 
+
+While we can easily see that the results are not ideal enough. The reason is that cars in the real life are much too complicated for the tradition ways to segment out. Whether the background is clean  
+
+\begin{figure}[a]
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:a} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{log_car3.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:b}
+    \includegraphics[width=0.2\textwidth]{logcf_car3.jpg}} 
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:c} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{log_car2.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:d}
+    \includegraphics[width=0.2\textwidth]{logcf_car2.jpg}}  
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:e} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{log_car1.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:f}
+    \includegraphics[width=0.2\textwidth]{logcf_car1.jpg}}
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:g} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{log_car4.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:h}
+    \includegraphics[width=0.2\textwidth]{logcf_car4.jpg}}
+    
+  \centering
+  \subfigure[]{
+    \label{fig:subfig:j} %% label for second subfigure
+    \includegraphics[width=0.2\textwidth]{log_car5.jpg}} 
+  \subfigure[]{
+  	\label{fig:subfig:k}
+    \includegraphics[width=0.2\textwidth]{logcf_car5.jpg}}  
+  \caption{Image segmentation results - (a)(c)(e)(g)(i) Result after LoG operator method; (b)(d)(f)(h)(j) Results after close operation and filling holes; }
+  \label{f5} %% label for entire figure
+\end{figure}
+
+\section{Conclusion}
+After the discussion above,a conclusion can be easily given that the selection of segmentation methods depend not only on the problem under consideration, but also the nature of the problem. Segmentation accuracy determines the eventual success or failure of computerized analysis procedures.
+
+
+
+
+
+
+
+
+\begin{thebibliography}{1}
+\bibitem{a}
+Linda G. Shapiro and George C. Stockman, \emph{Computer Vision}
+\bibitem{c}
+Barghout, Lauren, and Lawrence W. Lee, \emph{Perceptual information processing system}, 2003
+\bibitem{b}
+Gonzalez, Rafael C and Richard E. Woods, \emph{Digital Image Processing Third Edition}, 2010.
+\bibitem{m}
+R. Kimmel and A.M. Bruckstein, \emph{International Journal of Computer Vision}, 2003
+\bibitem{d}
+R. Kimmel, \emph{Geometric Level Set Methods in Imaging, Vision and Graphics}, 2003
+\bibitem{s}
+Hossein Mobahi, Shankar Rao, Allen Yang, Shankar Sastry and Yi Ma \emph{Segmentation of Natural Images by Texture and Boundary Compression, International Journal of Computer Vision}, 2011
+\bibitem{e}
+V. Caselles, R. Kimmel, and G. Sapiro, \emph{Geodesic active contours}, 1997
+
+\end{thebibliography}
+
+
+
+
+
+%for image position
+{\color{white}
+kkkbiography sectionFrom the result displayed in the Fig.\ref{f4} and Fig.\ref{f5}, highpass filter and Laplacian operator produce the best results in human vision system but the other four methods highlight more details. Advanced Laplacian operator performs best comprehensively.
+
+From the experimental and mathematical results it can be concluded that highpass filter detect the edges efficiently and the width of the edge differs with the change of the width of filter passband. Sobel and Prewitt operators performs well in the vertical and horizonal directions, consistent with the two kernels. Original Laplacian operator consider only the two direction crossing the centering pixel, bying adding the diagonal directions, the performance gets improved rapidly. Since the original blurry image is not noisy, LoG operator is inperior to the Laplacian one since it smooths the image before, which means losing some detail information at first.}
+
+
+
+
+
+% that's all folks
+\end{document}
+
+
